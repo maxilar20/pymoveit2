@@ -11,7 +11,7 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.node import Node
 
 from pymoveit2 import MoveIt2
-from pymoveit2.robots import panda
+from pymoveit2.robots import baxter
 
 
 def main():
@@ -40,12 +40,14 @@ def main():
     # Create MoveIt 2 interface
     moveit2 = MoveIt2(
         node=node,
-        joint_names=panda.joint_names(),
-        base_link_name=panda.base_link_name(),
-        end_effector_name=panda.end_effector_name(),
-        group_name=panda.MOVE_GROUP_ARM,
+        joint_names=baxter.joint_names(),
+        base_link_name=baxter.base_link_name(),
+        end_effector_name=baxter.end_effector_name(),
+        group_name=baxter.MOVE_GROUP_ARM,
         callback_group=callback_group,
     )
+
+    print("pos:", moveit2.compute_fk())
 
     # Spin the node in background thread(s)
     executor = rclpy.executors.MultiThreadedExecutor(2)

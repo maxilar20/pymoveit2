@@ -45,7 +45,7 @@ class MoveIt2Servo:
         # Create publisher
         self.__twist_pub = self._node.create_publisher(
             msg_type=TwistStamped,
-            topic="delta_twist_cmds",
+            topic="/servo_node/delta_twist_cmds",
             qos_profile=QoSProfile(
                 durability=QoSDurabilityPolicy.VOLATILE,
                 reliability=QoSReliabilityPolicy.RELIABLE,
@@ -66,7 +66,7 @@ class MoveIt2Servo:
             callback_group=callback_group,
         )
         self.__trigger_req = Trigger.Request()
-        self.__is_enabled = False
+        self.__is_enabled = True
 
         # Initialize message based on passed arguments
         self.__twist_msg = TwistStamped()
@@ -87,11 +87,13 @@ class MoveIt2Servo:
         Try to stop MoveIt 2 Servo during destruction.
         """
 
-        try:
-            if self.is_enabled:
-                self.__stop_service.call_async(self.__trigger_req)
-        except:
-            pass
+        # try:
+        #     if self.is_enabled:
+        #         self.__stop_service.call_async(self.__trigger_req)
+        # except:
+        #     pass
+
+        return
 
     def __call__(
         self,
@@ -120,11 +122,14 @@ class MoveIt2Servo:
                 "Command failed because MoveIt Servo is not yet enabled."
             )
             if enable_if_disabled:
+                self.enable(sync=True)
                 self._node.get_logger().warn(
                     f"Calling '{self.__start_service.srv_name}' service to enable MoveIt Servo..."
                 )
                 if not self.enable():
                     return
+                else:
+                    self._node.get_logger().info(f"MoveIt Servo enabled")
             else:
                 return
 

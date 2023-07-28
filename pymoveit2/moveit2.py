@@ -19,6 +19,8 @@ from moveit_msgs.srv import (
     GetPositionFK,
     GetPositionIK,
 )
+import rclpy
+
 from rclpy.action import ActionClient
 from rclpy.callback_groups import CallbackGroup
 from rclpy.node import Node
@@ -679,7 +681,6 @@ class MoveIt2:
           - `fk_link_names` defaults to end-effector
           - `joint_state` defaults to the current joint state
         """
-
         if not hasattr(self, "__compute_fk_client"):
             self.__init_compute_fk()
 
@@ -710,7 +711,12 @@ class MoveIt2:
             )
             return None
 
-        res = self.__compute_fk_client.call(self.__compute_fk_req)
+        self.__compute_fk_req.robot_state.joint_state.velocity = []
+        self.__compute_fk_req.robot_state.joint_state.effort = []
+
+        self.future_fk = self.__compute_fk_client.call_async(self.__compute_fk_req)
+        rclpy.spin_until_future_complete(self._node, self.future_2)
+        return self.future_fk.result()
 
         if MoveItErrorCodes.SUCCESS == res.error_code.val:
             return res.pose_stamped
